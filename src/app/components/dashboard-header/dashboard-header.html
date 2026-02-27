@@ -1,0 +1,90 @@
+<header class="flex items-start justify-between gap-md mb-lg p-md">
+  <div>
+    <h1 class="text-2xl font-bold text-text-primary flex items-center gap-sm">
+      <i class="pi pi-clock text-primary"></i>
+      Hi {{ userName() }}
+    </h1>
+    <p class="text-text-secondary text-sm mt-xs">
+      Welcome back. Your last login was on {{ lastLogin() }}.
+    </p>
+  </div>
+
+  <div class="flex items-center gap-sm">
+    <div class="flex items-center gap-xs">
+      <label for="grid-columns" class="text-sm text-text-secondary whitespace-nowrap"
+        >Columns</label
+      >
+      <p-inputNumber
+        inputId="grid-columns"
+        [ngModel]="columns()"
+        (ngModelChange)="onColumnsChange($event)"
+        [showButtons]="true"
+        [min]="1"
+        [max]="12"
+        buttonLayout="horizontal"
+        incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"
+        [inputStyle]="{ width: '3rem', textAlign: 'center' }"
+      />
+    </div>
+
+    <span class="block w-px h-6 bg-surface-border"></span>
+
+    <p-button
+      icon="pi pi-filter"
+      severity="secondary"
+      [outlined]="true"
+      [rounded]="true"
+      (onClick)="filterPopover.toggle($event)"
+      aria-label="Filter widgets"
+    />
+
+    <p-button
+      icon="pi pi-download"
+      severity="secondary"
+      [outlined]="true"
+      [rounded]="true"
+      (onClick)="download.emit()"
+      aria-label="Download"
+    />
+    <p-button
+      icon="pi pi-plus"
+      severity="contrast"
+      [rounded]="true"
+      (onClick)="addMenu.toggle($event)"
+      aria-label="Add widget"
+    />
+  </div>
+</header>
+
+<!-- Popup overlays — kept outside flex layout to avoid gap artifacts -->
+<p-popover #filterPopover>
+  <div class="flex flex-col gap-sm p-xs">
+    <span class="text-sm font-semibold text-text-primary">Show widget types</span>
+    @for (item of filterItems(); track item.type) {
+      <div class="flex items-center gap-sm">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="item.active"
+          (ngModelChange)="toggleFilter.emit(item.type)"
+          [inputId]="'filter-' + item.type"
+        />
+        <label [for]="'filter-' + item.type" class="text-sm cursor-pointer">{{ item.label }}</label>
+      </div>
+    }
+  </div>
+</p-popover>
+
+<p-menu
+  #addMenu
+  [model]="addWidgetMenuItems()"
+  [popup]="true"
+  [pt]="{ itemLink: { class: '!pl-lg !py-2xs text-sm' } }"
+>
+  <ng-template #submenuheader let-item>
+    <span class="text-xs font-bold uppercase tracking-wide opacity-70 py-xs">
+      <i [class]="item.icon" class="mr-xs"></i>
+      {{ item.label }}
+    </span>
+  </ng-template>
+</p-menu>

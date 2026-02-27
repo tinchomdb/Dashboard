@@ -1,12 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  host: { class: 'block min-h-screen bg-surface-ground' },
 })
-export class App {
-  protected readonly title = signal('dashboard');
-}
+export class App {}

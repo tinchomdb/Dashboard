@@ -1,0 +1,20 @@
+<div class="flex flex-col h-screen p-lg bg-surface-ground overflow-hidden">
+  <app-dashboard-header
+    [userName]="userProfile().name"
+    [lastLogin]="userProfile().lastLogin"
+    [columns]="columns()"
+    [activeFilters]="typeFilter()"
+    [addWidgetMenuItems]="addWidgetMenuItems()"
+    (download)="(null)"
+    (columnsChange)="onColumnsChange($event)"
+    (toggleFilter)="onToggleFilter($event)"
+  />
+
+  <gridster [options]="gridOptions()">
+    @for (widget of filteredWidgets(); track widget.id) {
+      <gridster-item [item]="widget">
+        <app-widget-host [widget]="widget" (remove)="onRemoveWidget($event)" />
+      </gridster-item>
+    }
+  </gridster>
+</div>

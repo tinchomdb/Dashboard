@@ -1,0 +1,10 @@
+<p-card [header]="title()" [subheader]="subtitle() ?? ''" [pt]="cardPt">
+  <div class="h-full">
+    <p-chart
+      [type]="chartType()"
+      [data]="$any(chartData())"
+      [options]="$any(chartOptions())"
+      styleClass="h-full"
+    />
+  </div>
+</p-card>

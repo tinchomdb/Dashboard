@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  height: 100%;
+  container-type: size;
+}
+
+@container (min-width: 200px) and (min-height: 80px) {
+  .kpi-value {
+    font-size: var(--font-size-display-lg);
+  }
+}
+
+@container (min-width: 350px) and (min-height: 120px) {
+  .kpi-value {
+    font-size: var(--font-size-display-xl);
+  }
+}
+
+@container (min-width: 500px) and (min-height: 180px) {
+  .kpi-value {
+    font-size: var(--font-size-display-2xl);
+  }
+}

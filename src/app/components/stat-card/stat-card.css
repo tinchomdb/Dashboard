@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  height: 100%;
+  container-type: size;
+}
+
+@container (min-width: 200px) and (min-height: 100px) {
+  .stat-value {
+    font-size: var(--font-size-display-md);
+  }
+
+  .stat-content {
+    gap: var(--spacing-sm);
+  }
+}
+
+@container (min-width: 350px) and (min-height: 180px) {
+  .stat-value {
+    font-size: var(--font-size-display-xl);
+  }
+}
