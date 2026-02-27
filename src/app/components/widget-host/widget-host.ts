@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 import { PopoverModule } from 'primeng/popover';
@@ -54,6 +62,8 @@ export class WidgetHost {
 
   protected readonly actionsOpen = signal(false);
 
+  private readonly chartCard = viewChild(ChartCard);
+
   protected readonly isChartWidget = computed(() => {
     const type = this.widget().type;
     return type === 'bar-chart' || type === 'radar-chart' || type === 'horizontal-bar-chart';
@@ -74,5 +84,15 @@ export class WidgetHost {
 
   protected onRemove(): void {
     this.remove.emit(this.widget().id);
+  }
+
+  protected onDownloadChart(): void {
+    const base64 = this.chartCard()?.getBase64Image();
+    if (!base64) return;
+
+    const link = document.createElement('a');
+    link.download = `${this.widget().title || 'chart'}.png`;
+    link.href = base64;
+    link.click();
   }
 }

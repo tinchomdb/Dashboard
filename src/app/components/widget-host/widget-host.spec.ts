@@ -103,4 +103,37 @@ describe('WidgetHost', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('.widget-drag-handle')).toBeTruthy();
   });
+
+  it('should show download button for chart widgets when actions are open', () => {
+    const fixture = TestBed.createComponent(WidgetHost);
+    fixture.componentRef.setInput(
+      'widget',
+      createMockWidget({
+        type: 'bar-chart',
+        loading: false,
+        data: { labels: ['A'], datasets: [{ data: [1] }] },
+      }),
+    );
+    fixture.detectChanges();
+
+    fixture.componentInstance['actionsOpen'].set(true);
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const downloadBtn = el.querySelector('[aria-label="Download chart"]');
+    expect(downloadBtn).toBeTruthy();
+  });
+
+  it('should not show download button for non-chart widgets', () => {
+    const fixture = TestBed.createComponent(WidgetHost);
+    fixture.componentRef.setInput('widget', createMockWidget({ type: 'kpi', loading: false }));
+    fixture.detectChanges();
+
+    fixture.componentInstance['actionsOpen'].set(true);
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const downloadBtn = el.querySelector('[aria-label="Download chart"]');
+    expect(downloadBtn).toBeFalsy();
+  });
 });

@@ -61,6 +61,6 @@ export const WIDGET_TYPE_DEFAULTS: Record<WidgetType, { cols: number; rows: numb
   kpi: { cols: 1, rows: 1 },
   stat: { cols: 1, rows: 2 },
   'bar-chart': { cols: 3, rows: 3 },
-  'radar-chart': { cols: 3, rows: 3 },
+  'radar-chart': { cols: 3, rows: 5 },
   'horizontal-bar-chart': { cols: 3, rows: 3 },
 };

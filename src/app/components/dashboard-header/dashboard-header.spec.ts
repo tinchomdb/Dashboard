@@ -46,20 +46,6 @@ describe('DashboardHeader', () => {
     expect(el.textContent).toContain('February 27 at 8:15am CET');
   });
 
-  it('should emit download event', () => {
-    const fixture = TestBed.createComponent(DashboardHeader);
-    fixture.detectChanges();
-    let downloadEmitted = false;
-    fixture.componentInstance.download.subscribe(() => (downloadEmitted = true));
-
-    const downloadBtn =
-      fixture.nativeElement.querySelector('p-button[aria-label="Download"] button') ??
-      fixture.nativeElement.querySelector('[aria-label="Download"]');
-    downloadBtn?.click();
-    fixture.detectChanges();
-    expect(downloadEmitted).toBe(true);
-  });
-
   it('should emit columnsChange when column input changes', () => {
     const fixture = TestBed.createComponent(DashboardHeader);
     fixture.detectChanges();

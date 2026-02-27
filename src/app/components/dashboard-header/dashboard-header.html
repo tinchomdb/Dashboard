@@ -40,14 +40,6 @@
     />
 
     <p-button
-      icon="pi pi-download"
-      severity="secondary"
-      [outlined]="true"
-      [rounded]="true"
-      (onClick)="download.emit()"
-      aria-label="Download"
-    />
-    <p-button
       icon="pi pi-plus"
       severity="contrast"
       [rounded]="true"
@@ -59,7 +51,7 @@
 
 <!-- Popup overlays — kept outside flex layout to avoid gap artifacts -->
 <p-popover #filterPopover>
-  <div class="flex flex-col gap-sm p-xs">
+  <div class="flex flex-col gap-sm p-xs" (click)="$event.stopPropagation()">
     <span class="text-sm font-semibold text-text-primary">Show widget types</span>
     @for (item of filterItems(); track item.type) {
       <div class="flex items-center gap-sm">

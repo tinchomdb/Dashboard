@@ -28,7 +28,6 @@ export class DashboardHeader {
   activeFilters = input<ReadonlySet<WidgetType>>(new Set(WIDGET_TYPES));
   addWidgetMenuItems = input<MenuItem[]>([]);
 
-  download = output<void>();
   columnsChange = output<number>();
   toggleFilter = output<WidgetType>();
 

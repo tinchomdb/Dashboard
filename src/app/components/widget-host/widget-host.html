@@ -6,6 +6,17 @@
           class="widget-drag-handle pi pi-arrows-alt cursor-grab active:cursor-grabbing p-sm text-text-muted text-sm"
           aria-label="Drag to reorder"
         ></span>
+        @if (isChartWidget()) {
+          <p-button
+            icon="pi pi-download"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            size="small"
+            (onClick)="onDownloadChart()"
+            aria-label="Download chart"
+          />
+        }
         <p-button
           icon="pi pi-times"
           [rounded]="true"

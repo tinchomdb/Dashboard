@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, viewChild } from '@angular/core';
 import { CardModule } from 'primeng/card';
-import { ChartModule } from 'primeng/chart';
+import { ChartModule, UIChart } from 'primeng/chart';
 import { CARD_PT_FILL_STRETCH } from '../shared/card-passthrough';
 import { ChartType } from '../../models/widget.model';
 
@@ -19,5 +19,11 @@ export class ChartCard {
   chartData = input.required<object>();
   chartOptions = input<object>();
 
+  private readonly chartRef = viewChild(UIChart);
+
   protected readonly cardPt = CARD_PT_FILL_STRETCH;
+
+  getBase64Image(): string | null {
+    return this.chartRef()?.chart?.toBase64Image() ?? null;
+  }
 }
