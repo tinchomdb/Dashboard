@@ -6,7 +6,9 @@
 export const CARD_PT_FILL = {
   root: { class: 'h-full overflow-hidden' },
   body: { class: 'h-full flex flex-col !p-sm' },
-  title: { class: '!text-xs !font-semibold truncate !m-0' },
+  title: {
+    class: '!text-xs !font-semibold truncate flex-shrink-0',
+  },
   content: { class: 'flex-1 flex items-center justify-center !p-0' },
 };
 

@@ -104,6 +104,82 @@ describe('DashboardStateService', () => {
       const wideWidgets = service.widgets().filter((w) => w.cols > 2);
       expect(wideWidgets.length).toBe(0);
     });
+
+    it('should update maxItemCols to match column count', () => {
+      service.updateColumns(3);
+      expect(service.gridOptions().maxItemCols).toBe(3);
+    });
+
+    it('should clamp widget x positions to stay within grid', () => {
+      // Manually place a widget at x=3 with cols=1 in a 4-col grid
+      service.updateWidget(service.widgets()[0].id, { x: 3, cols: 1 });
+      // Shrink to 2 columns: x=3 with cols=1 exceeds grid (3+1 > 2)
+      service.updateColumns(2);
+      const widget = service.widgets()[0];
+      expect(widget.x + widget.cols).toBeLessThanOrEqual(2);
+    });
+
+    it('should resolve overlapping widgets into new rows when columns shrink', () => {
+      // 6 KPI cards at x=0..5, y=0 — reducing to 3 columns should push
+      // overflow cards to new rows rather than stacking
+      service.updateColumns(3);
+      const positions = service.widgets().map((w) => `${w.x},${w.y}`);
+      const uniquePositions = new Set(positions);
+      // No two widgets should share the exact same top-left corner
+      expect(uniquePositions.size).toBe(positions.length);
+    });
+
+    it('should not create any cell overlap between widgets', () => {
+      service.updateColumns(2);
+      const widgets = service.widgets();
+      let hasOverlap = false;
+      for (let i = 0; i < widgets.length; i++) {
+        for (let j = i + 1; j < widgets.length; j++) {
+          const a = widgets[i];
+          const b = widgets[j];
+          if (
+            a.x < b.x + b.cols &&
+            a.x + a.cols > b.x &&
+            a.y < b.y + b.rows &&
+            a.y + a.rows > b.y
+          ) {
+            hasOverlap = true;
+          }
+        }
+      }
+      expect(hasOverlap).toBe(false);
+    });
+
+    it('should preserve relative visual order after column reduction', () => {
+      // The first KPI (originally x=0,y=0) should remain at or near the top
+      const firstKpi = service.widgets()[0];
+      service.updateColumns(3);
+      const updated = service.widgets().find((w) => w.id === firstKpi.id)!;
+      expect(updated.y).toBe(0);
+      expect(updated.x).toBe(0);
+    });
+
+    it('should stack all widgets vertically when reduced to 1 column', () => {
+      service.updateColumns(1);
+      const widgets = service.widgets();
+      // Every widget should have x=0 and cols clamped to 1
+      for (const w of widgets) {
+        expect(w.x).toBe(0);
+        expect(w.cols).toBe(1);
+      }
+      // No overlaps: each widget occupies unique rows
+      let hasOverlap = false;
+      for (let i = 0; i < widgets.length; i++) {
+        for (let j = i + 1; j < widgets.length; j++) {
+          const a = widgets[i];
+          const b = widgets[j];
+          if (a.y < b.y + b.rows && a.y + a.rows > b.y) {
+            hasOverlap = true;
+          }
+        }
+      }
+      expect(hasOverlap).toBe(false);
+    });
   });
 
   describe('gridOptions', () => {

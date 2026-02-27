@@ -66,19 +66,21 @@ export class DashboardStateService {
    */
   readonly gridOptions = signal<GridsterConfig>({
     gridType: GridType.ScrollVertical,
-    compactType: CompactType.CompactUp,
+    compactType: CompactType.CompactUpAndLeft,
     displayGrid: DisplayGrid.OnDragAndResize,
     rowHeightRatio: ROW_HEIGHT_RATIO,
     margin: DEFAULT_MARGIN,
     outerMargin: true,
     minCols: DEFAULT_COLUMNS,
     maxCols: DEFAULT_COLUMNS,
+    maxItemCols: DEFAULT_COLUMNS,
     minRows: 1,
     maxRows: 100,
     defaultItemCols: 1,
     defaultItemRows: 1,
     pushItems: true,
     swap: false,
+    disableAutoPositionOnConflict: false,
     draggable: {
       enabled: true,
       ignoreContent: true,
@@ -143,13 +145,79 @@ export class DashboardStateService {
   updateColumns(columns: number): void {
     this.columns.set(columns);
 
-    // Clamp widget sizes that exceed the new column count
-    this.widgets.update((list) =>
-      list.map((w) => (w.cols > columns ? { ...w, cols: columns } : w)),
-    );
+    // Clamp widget sizes and positions that exceed the new column count
+    const clamped = this.widgets().map((w) => {
+      const cols = Math.min(w.cols, columns);
+      const x = Math.min(w.x, columns - cols);
+      return cols !== w.cols || x !== w.x ? { ...w, cols, x } : w;
+    });
 
-    this.gridOptions.update((opts) => ({ ...opts, minCols: columns, maxCols: columns }));
+    // Resolve any overlapping positions caused by clamping
+    this.widgets.set(this.resolveCollisions(clamped, columns));
+
+    this.gridOptions.update((opts) => ({
+      ...opts,
+      minCols: columns,
+      maxCols: columns,
+      maxItemCols: columns,
+    }));
     this.gridsterApi?.resize?.();
+  }
+
+  /**
+   * Resolves overlapping widget positions by re-placing colliding widgets
+   * into the first available grid slot. Widgets are processed in visual
+   * order (top-to-bottom, left-to-right) so earlier widgets keep priority.
+   */
+  private resolveCollisions(widgets: DashboardWidget[], columns: number): DashboardWidget[] {
+    // Sort by position: top rows first, then leftmost
+    const sorted = [...widgets].sort((a, b) => a.y - b.y || a.x - b.x);
+
+    // Occupancy grid: grid[row][col] = true if occupied
+    const grid: boolean[][] = [];
+
+    const isOccupied = (x: number, y: number, cols: number, rows: number): boolean => {
+      for (let r = y; r < y + rows; r++) {
+        for (let c = x; c < x + cols; c++) {
+          if (grid[r]?.[c]) return true;
+        }
+      }
+      return false;
+    };
+
+    const markOccupied = (x: number, y: number, cols: number, rows: number): void => {
+      for (let r = y; r < y + rows; r++) {
+        if (!grid[r]) grid[r] = new Array(columns).fill(false);
+        for (let c = x; c < x + cols; c++) {
+          grid[r][c] = true;
+        }
+      }
+    };
+
+    const findFirstFreePosition = (cols: number, rows: number): { x: number; y: number } => {
+      for (let r = 0; ; r++) {
+        for (let c = 0; c <= columns - cols; c++) {
+          if (!isOccupied(c, r, cols, rows)) return { x: c, y: r };
+        }
+      }
+    };
+
+    const result: DashboardWidget[] = [];
+
+    for (const widget of sorted) {
+      if (!isOccupied(widget.x, widget.y, widget.cols, widget.rows)) {
+        // Position is free — keep it
+        markOccupied(widget.x, widget.y, widget.cols, widget.rows);
+        result.push(widget);
+      } else {
+        // Collision — find the first available slot
+        const pos = findFirstFreePosition(widget.cols, widget.rows);
+        markOccupied(pos.x, pos.y, widget.cols, widget.rows);
+        result.push({ ...widget, ...pos });
+      }
+    }
+
+    return result;
   }
 
   toggleTypeFilter(type: WidgetType): void {
