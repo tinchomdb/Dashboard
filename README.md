@@ -1,265 +1,258 @@
 # Dynamic Dashboard
 
-A dynamic, interactive dashboard built with **Angular 21**, **Tailwind CSS 4**, and **PrimeNG 21** — showcasing drag-and-drop layouts, resizable widgets, real-time data loading with skeleton states, and a fully signal-based architecture.
+A fully interactive, widget-based analytics dashboard built with **Angular 21**, **PrimeNG 21**, **Tailwind CSS 4**, and **Chart.js** — showcasing modern frontend architecture, clean code practices, and attention to design fidelity.
 
-> Built as a frontend technical assessment focused on **code quality**, **architecture**, and **attention to detail**.
+![Dashboard Design Reference](dashboard.png)
 
-![Dashboard Preview](dashboard.png)
-
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Architecture](#architecture)
-- [State Management](#state-management)
-- [Styling Strategy](#styling-strategy)
-- [Testing](#testing)
-- [Accessibility](#accessibility)
-- [Design Decisions](#design-decisions)
+> **Context:** This project was bult with a focus on code quality and maintainability. The data theme is Lord of the Rings — because if you're going to build a dashboard, the least you can do is track the Fellowship's KPIs.
 
 ---
 
 ## Features
 
-| Feature                        | Description                                                                 |
-| ------------------------------ | --------------------------------------------------------------------------- |
-| **Drag-and-drop**              | Reposition widgets freely via a dedicated drag handle (Gridster2)           |
-| **Resizable widgets**          | Resize any widget by dragging its edges; layout auto-compacts               |
-| **Dynamic column control**     | Adjust grid columns (1–12) with automatic collision resolution              |
-| **Widget catalog**             | Add new widgets from a categorized popup menu                               |
-| **Remove widgets**             | Remove any widget via its action toolbar                                    |
-| **Type filtering**             | Filter visible widgets by type (KPI, Stat, Chart) via a popover             |
-| **Loading skeletons**          | PrimeNG skeleton placeholders shown during simulated API latency (1–2s)     |
-| **Chart download**             | Export any chart widget as a PNG image                                      |
-| **Multiple widget types**      | KPI cards, stat cards with severity badges, bar/radar/horizontal-bar charts |
-| **Container-query responsive** | Widget content scales based on its own dimensions, not the viewport         |
-| **Mock API**                   | HTTP interceptor simulates backend endpoints with realistic delays          |
-| **Lazy-loaded routes**         | Dashboard module loaded on demand for optimal initial bundle size           |
+### Grid-Based Drag-and-Drop Layout
+
+- Widgets live in a responsive grid powered by [angular-gridster2](https://github.com/tiberiuzuld/angular-gridster2)
+- **Drag-and-drop** repositioning via a dedicated drag handle per widget
+- **Resizable** widgets with live visual feedback during resize
+- **Auto-compaction** (`CompactUpAndLeft`) keeps the layout tidy after every move
+- **Collision resolution** — a custom algorithm repositions widgets when column count changes, guaranteeing zero overlap
+
+### 9 Widget Types
+
+| Type                 | Size | Description                                      |
+| -------------------- | ---- | ------------------------------------------------ |
+| KPI Card             | 1×1  | Single large numeric value with fluid typography |
+| Stat Card            | 1×2  | Value with contextual severity badge             |
+| Bar Chart            | 3×3  | Vertical bar chart                               |
+| Horizontal Bar Chart | 3×3  | Stacked horizontal bar chart                     |
+| Line Chart           | 3×3  | Area/line chart with fill and curve tension      |
+| Radar Chart          | 3×5  | Multi-dataset radar chart                        |
+| Pie Chart            | 2×3  | Pie chart with side legend                       |
+| Doughnut Chart       | 2×3  | Doughnut variant                                 |
+| Polar Area Chart     | 2×3  | Polar area chart                                 |
+
+### Widget Management
+
+- **Add widgets** from a categorized popup menu listing all available variants from the server-loaded catalog
+- **Remove widgets** via a per-widget action toolbar
+- **Download charts as PNG** — chart widgets expose a download button that triggers a browser-native file download
+- **Filter by widget type** — a popover with checkboxes to show/hide specific widget categories
+
+### Configurable Column Count
+
+An InputNumber control in the header lets the user set the grid between 1 and 12 columns. The collision resolution algorithm automatically reflows widgets to fit without overlap.
+
+### Loading Skeletons
+
+Each widget renders a PrimeNG `Skeleton` loader (title + subtitle + body) while data is being fetched from the mock API, providing a polished loading experience.
+
+### Layout Persistence
+
+The user's widget arrangement is saved to `localStorage` via a mock PUT endpoint and restored on page reload — with full validation and graceful fallback to the default layout if the stored data is invalid.
+
+### User Profile & Last Login
+
+A greeting header displays the user's name and their last login timestamp, persisted across sessions via `localStorage`.
 
 ---
 
 ## Tech Stack
 
-| Technology        | Version | Purpose                                                                |
-| ----------------- | ------- | ---------------------------------------------------------------------- |
-| Angular           | 21      | Application framework                                                  |
-| TypeScript        | 5.9     | Type-safe development                                                  |
-| Tailwind CSS      | 4       | Utility-first styling with design tokens                               |
-| PrimeNG           | 21      | UI component library (Card, Skeleton, Chart, Popover, Menu, Tag, etc.) |
-| Chart.js          | 4.5     | Chart rendering (via PrimeNG Chart wrapper)                            |
-| angular-gridster2 | 21      | Grid layout engine with drag-and-drop + resize                         |
-| Vitest            | 4.0     | Unit testing (Angular builder integration)                             |
-| RxJS              | 7.8     | HTTP layer (Observables from HttpClient)                               |
-
----
-
-## Getting Started
-
-```bash
-# Install dependencies
-npm install
-
-# Start dev server (http://localhost:4200)
-ng serve
-
-# Run unit tests
-ng test
-
-# Production build
-ng build
-```
-
----
-
-## Project Structure
-
-```
-src/app/
-├── models/              # Type definitions and constants (WidgetType, Widget, WidgetConfig)
-├── data/                # Mock data and default layout configuration
-├── repositories/        # HTTP layer — pure API calls, no business logic
-├── services/            # State management and business logic (signals)
-├── interceptors/        # Mock API interceptor (simulates backend)
-├── views/               # Smart (container) page components
-└── components/
-    ├── dashboard-header/  # Toolbar: column control, type filters, add-widget menu
-    └── widget-host/       # Widget orchestrator: loading state, type dispatch, actions
-        ├── kpi-card/      # Simple numeric KPI display
-        ├── stat-card/     # Value + severity badge
-        ├── chart-card/    # Chart.js charts (bar, radar, horizontal bar)
-        └── shared/        # PrimeNG Card pass-through configurations
-```
+| Technology                                                            | Version | Role                                      |
+| --------------------------------------------------------------------- | ------- | ----------------------------------------- |
+| [Angular](https://angular.dev)                                        | 21      | Core framework                            |
+| [TypeScript](https://www.typescriptlang.org)                          | 5.9     | Language                                  |
+| [PrimeNG](https://primeng.org)                                        | 21      | UI component library                      |
+| [Tailwind CSS](https://tailwindcss.com)                               | 4       | Utility-first styling                     |
+| [Chart.js](https://www.chartjs.org)                                   | 4.5     | Chart rendering (via PrimeNG `<p-chart>`) |
+| [angular-gridster2](https://github.com/tiberiuzuld/angular-gridster2) | 21      | Drag-and-drop grid                        |
+| [Vitest](https://vitest.dev)                                          | 4       | Unit testing                              |
+| [esbuild](https://esbuild.github.io)                                  | —       | Build toolchain (via `@angular/build`)    |
 
 ---
 
 ## Architecture
 
-### Layered Design
-
-The architecture follows a clean **separation of concerns** with distinct layers:
-
 ```
-┌─────────────────────────────────────────────────────┐
-│  Views (Smart Components)                           │
-│  Wire services to templates, no direct HTTP calls   │
-├─────────────────────────────────────────────────────┤
-│  Components (Presentational / Dumb)                 │
-│  Input/output only — no injected services           │
-├─────────────────────────────────────────────────────┤
-│  Services                                           │
-│  Business logic, state management (signals)         │
-├─────────────────────────────────────────────────────┤
-│  Repositories                                       │
-│  Pure HTTP calls — URL construction + HttpClient    │
-├─────────────────────────────────────────────────────┤
-│  Interceptors                                       │
-│  Mock API — intercepts /api/* and returns test data │
-└─────────────────────────────────────────────────────┘
+src/app/
+├── models/            Type definitions, constants, discriminated unions
+├── data/              Static default layout & mock data
+├── repositories/      HTTP abstraction (thin data-access layer)
+├── services/          Business logic & reactive state (signals)
+├── interceptors/      Mock API interceptor (simulates backend)
+├── views/             Smart page-level components
+└── components/
+    ├── dashboard-header/   Toolbar (dumb component)
+    └── widget-host/        Widget container + type routing
+        ├── kpi-card/       KPI display (dumb)
+        ├── stat-card/      Stat + badge display (dumb)
+        ├── chart-card/     Chart.js wrapper (dumb)
+        └── shared/         Reusable PrimeNG Card passthrough configs
 ```
 
-### Repository Pattern
+### Layered Separation of Concerns
 
-The `DashboardRepository` is a thin HTTP layer with a single responsibility: constructing URLs and making `HttpClient` calls. It owns no state and performs no transformations — keeping the HTTP concern completely isolated from business logic.
+The application follows a strict **Repository → Service → View → Component** layering:
 
-### Smart vs. Dumb Components
+| Layer                | Responsibility                                                                               | Knows About      |
+| -------------------- | -------------------------------------------------------------------------------------------- | ---------------- |
+| **Repository**       | Pure HTTP calls — single responsibility, no business logic                                   | HTTP client only |
+| **Service**          | Owns all state (signals), grid configuration, CRUD, layout persistence, collision resolution | Repository       |
+| **View (Smart)**     | Injects services, exposes signals to template, delegates user events                         | Service          |
+| **Component (Dumb)** | Receives data via `input()`, emits events via `output()` — zero knowledge of app state       | Nothing          |
 
-- **Smart components** (`DashboardPage`) inject services, manage data flow, and coordinate child components.
-- **Dumb components** (`DashboardHeader`, `KpiCard`, `StatCard`, `ChartCard`) communicate exclusively through `input()` and `output()` — they are fully reusable and testable in isolation.
-- **`WidgetHost`** acts as an orchestrator — it receives a widget configuration, displays a skeleton while loading, and delegates rendering to the appropriate card component.
+This separation means every layer can be tested in isolation, and dumb components are fully reusable with no coupling to application logic.
+
+---
+
+## Code Quality & Best Practices
+
+### Modern Angular APIs
+
+- **Signal-based inputs/outputs** — `input()`, `input.required()`, `output()` instead of decorators
+- **Signals for state** — `signal()` and `computed()` for all reactive state, no BehaviorSubjects
+- **`inject()` function** — functional dependency injection, no constructor parameter lists
+- **Native control flow** — `@if`, `@for`, `@switch` instead of structural directives
+- **Standalone components** — Angular 21 default, no NgModules anywhere
+- **`OnPush` change detection** on every component
+- **Lazy-loaded routes** — the dashboard page is loaded via `loadComponent()`
+
+### Strict TypeScript
+
+- **`strict: true`** with all additional strict flags enabled (`noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`)
+- **Strict templates** — `strictTemplates`, `strictInjectionParameters`, `strictInputAccessModifiers`
+- **`as const` assertions** for literal union types (`WIDGET_TYPES`)
+- **Discriminated unions** — `WidgetData = KpiData | StatData | ChartData` with proper type narrowing
+- **No `any`** — `unknown` is used where type is uncertain, with explicit narrowing
+- **Named constants** — `DEFAULT_COLUMNS`, `DELAY_MIN`, `DELAY_MAX`, etc. — no magic numbers or strings
+
+### Design Token System
+
+All design values flow through CSS custom properties defined in Tailwind's `@theme` block:
+
+- Semantic naming: `--color-primary`, `--color-surface-ground`, `--spacing-md`, `--font-size-display-xl`
+- **Zero hardcoded values** — no `bg-blue-500` or `p-4`, only semantic tokens like `bg-surface-main` and `text-text-secondary`
+- PrimeNG Card layouts customized via the **Passthrough (PT) API** with shared config objects
+
+### Responsive Design via Container Queries
+
+Instead of media queries tied to viewport width, the dashboard uses **CSS Container Queries**:
+
+- **Header** uses `@container` at 800px to switch between column and row layout
+- **KPI cards** scale through 5 typography breakpoints based on their own container size
+- **Stat cards** scale through 3 breakpoints for value + badge sizing
+
+This means widgets adapt to their allocated grid space, not the screen size — crucial for a resizable grid layout.
+
+### Accessibility (WCAG AA)
+
+- `aria-label` on all icon-only buttons (filter, add, drag, download, remove, actions toggle)
+- Proper `<label>` elements linked to form controls via `for`/`inputId`
+- Semantic HTML: `<header>`, `<h1>`, `<p>`, `<main>`
+- `lang="en"` on the root `<html>` element
+
+### Immutable State Updates
+
+All signal updates produce new object/array references — never mutating in place:
+
+```typescript
+this.widgets.update((list) => list.filter((w) => w.id !== id)); // remove
+this.widgets.update((list) => [...list, newWidget]); // add
+this.typeFilter.update((set) => {
+  const s = new Set(set); /* ... */
+}); // toggle
+```
 
 ### Mock API Interceptor
 
-A functional `HttpInterceptorFn` intercepts all `/api/*` requests and returns mock data with a randomized 1–2 second delay — simulating a real backend without any external dependencies. This approach allows the entire application to run standalone while demonstrating proper HTTP patterns (loading states, async data flow).
+A functional `HttpInterceptorFn` simulates a realistic backend:
 
----
-
-## State Management
-
-The application uses **Angular Signals exclusively** for state management — no external state libraries, no RxJS `BehaviorSubject` for state.
-
-| Signal               | Type         | Location           | Purpose                                   |
-| -------------------- | ------------ | ------------------ | ----------------------------------------- |
-| `widgets`            | Writable     | `DashboardService` | Full widget list with position + data     |
-| `widgetCatalog`      | Writable     | `DashboardService` | Available widgets for the add-widget menu |
-| `columns`            | Writable     | `DashboardService` | Active grid column count                  |
-| `typeFilter`         | Writable     | `DashboardService` | `Set<WidgetType>` controlling visibility  |
-| `gridOptions`        | Writable     | `DashboardService` | Gridster configuration                    |
-| `filteredWidgets`    | **Computed** | `DashboardService` | Widgets filtered by active types          |
-| `addWidgetMenuItems` | **Computed** | `DashboardService` | Menu items derived from catalog           |
-| `userProfile`        | Writable     | `UserService`      | User name and last login timestamp        |
-
-### Key Principles
-
-- **Immutable updates** — All signal mutations use `.update()` returning new arrays/objects; no direct mutation.
-- **Computed derived state** — `filteredWidgets` and `addWidgetMenuItems` are `computed()` signals that automatically re-evaluate when dependencies change.
-- **RxJS only for HTTP** — Observables are used solely for `HttpClient` responses; all application state flows through signals.
-
----
-
-## Styling Strategy
-
-### Design Tokens
-
-All visual values are defined as **CSS custom properties** (design tokens) in a centralized `@theme` block — no hardcoded colors, spacing, or font sizes anywhere in the codebase:
-
-```css
-/* Examples from the token system */
---color-primary, --color-primary-darker, --color-danger
---surface-card, --surface-main, --surface-elevated
---text-primary, --text-secondary, --text-tertiary
---spacing-xs, --spacing-sm, --spacing-md, --spacing-lg
---radius-md, --radius-lg
---font-sm, --font-base, --font-lg, --font-xl, --font-4xl
-```
-
-Tailwind v4 exposes these as utilities (`bg-surface-card`, `text-text-secondary`, `p-md`, `rounded-lg`), ensuring a **single source of truth** for the entire design system.
-
-### Container Queries
-
-Widget cards use **CSS `@container` queries** instead of viewport-based breakpoints. This means a KPI card scales its typography based on the card's own dimensions — critical for a dashboard where widget sizes are user-controlled:
-
-```css
-@container (min-width: 200px) {
-  .kpi-value {
-    font-size: var(--font-4xl);
-  }
-}
-@container (min-width: 120px) {
-  .kpi-value {
-    font-size: var(--font-xl);
-  }
-}
-```
-
-### PrimeNG Pass-Through
-
-PrimeNG components are customized via the **pass-through API** (`pt` objects) with Tailwind classes — avoiding CSS overrides and keeping styling consistent with the utility-first approach.
+- **Randomized delays** (1–2 seconds) on data endpoints for skeleton testing
+- **Instant responses** for user profile and layout (for smooth page load UX)
+- **`localStorage` persistence** with type-guarded validation and graceful fallback
+- **Dynamic widget catalog** built at runtime from type configs × mock data
+- **Pass-through** for unrecognized URLs
 
 ---
 
 ## Testing
 
-**12 spec files** covering every architectural layer, run with Vitest and Angular's `TestBed`:
+**66+ unit tests** across 10 spec files using **Vitest** with Angular TestBed:
+
+| Area               | Tests | What's Covered                                                                            |
+| ------------------ | ----- | ----------------------------------------------------------------------------------------- |
+| **Models**         | 7     | Widget type definitions, config labels/dimensions, mock data integrity                    |
+| **Repository**     | 6     | All HTTP endpoints (GET/PUT), correct URLs and methods                                    |
+| **Service**        | 17    | Initialization, CRUD, column clamping, collision resolution, grid options, type filtering |
+| **Interceptor**    | 11    | All mock endpoints, localStorage persistence, invalid data fallbacks, pass-through        |
+| **Dashboard Page** | 4     | Component creation, header rendering, gridster container, widget count                    |
+| **Header**         | 9     | Welcome message, last login, column changes, filter items, menu items, add widget         |
+| **Widget Host**    | 8     | Skeleton state, card type routing, remove events, drag handle, download button            |
+| **KPI Card**       | 4     | Title, value rendering, fallback display                                                  |
+| **Stat Card**      | 4     | Title, value, badge rendering                                                             |
+| **App**            | 2     | Bootstrap, router outlet                                                                  |
+
+**Testing patterns used:**
+
+- `HttpTestingController` for HTTP layer isolation
+- `vi.useFakeTimers()` for deterministic async testing
+- `fixture.componentRef.setInput()` for signal-based inputs
+- Helper functions (`flushInitRequests()`) to reduce test boilerplate
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm 11+
+
+### Install & Run
 
 ```bash
-ng test
+npm install
+npm start
 ```
 
-### Coverage by Layer
+The dev server starts at `http://localhost:4200`.
 
-| Layer           | Files Tested                                                                               | What's Verified                                                                |
-| --------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| **Models**      | `widget.model.spec.ts`                                                                     | Type constants, config completeness, mock data integrity                       |
-| **Repository**  | `dashboard.repository.spec.ts`                                                             | Correct URLs, HTTP methods, response mapping (`HttpTestingController`)         |
-| **Interceptor** | `mock-api.interceptor.spec.ts`                                                             | Each mock endpoint returns correct data; unknown URLs pass through             |
-| **Services**    | `dashboard.service.spec.ts`, `user.service.spec.ts`                                        | CRUD operations, column collision resolution, grid config, type filtering      |
-| **Views**       | `dashboard.page.spec.ts`                                                                   | Component wiring, child component rendering, widget count                      |
-| **Components**  | `dashboard-header.spec.ts`, `widget-host.spec.ts`, `kpi-card.spec.ts`, `stat-card.spec.ts` | Input/output contracts, skeleton states, card type dispatch, action visibility |
+### Run Tests
 
-### Notable Test Quality
+```bash
+npm test
+```
 
-- **`DashboardService` tests** are particularly thorough — they verify collision detection, overlap prevention, visual order preservation during column changes, and correct 1-column stacking behavior.
-- **`HttpTestingController`** is used for repository tests, verifying exact API URLs and HTTP methods.
-- **Component tests** verify both rendering and behavior — output emissions, conditional rendering, and skeleton visibility.
+### Build for Production
+
+```bash
+npm run build
+```
 
 ---
 
-## Accessibility
+## Project Decisions
 
-The dashboard follows **WCAG AA** guidelines:
-
-- **ARIA labels** on all icon-only buttons (`aria-label="Filter widgets"`, `"Add widget"`, `"Remove widget"`, `"Download chart"`, `"Drag to reorder"`)
-- **Form label associations** — All inputs have proper `<label for="...">` / `inputId` pairings
-- **Semantic HTML** — `<header>`, `<h1>` page heading, structured content hierarchy
-- **Cursor feedback** — Drag handles show `cursor-grab` / `active:cursor-grabbing`
-- **Keyboard accessible** — PrimeNG components provide built-in keyboard navigation
-
----
-
-## Design Decisions
-
-| Decision                                 | Rationale                                                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Signals over RxJS for state**          | Simpler mental model, less boilerplate, native Angular reactivity — RxJS reserved for where it excels (HTTP) |
-| **Repository pattern**                   | Isolates HTTP from business logic; easy to swap mock interceptor for a real backend                          |
-| **Functional interceptor**               | Lighter than class-based; aligns with Angular's modern functional API direction                              |
-| **Container queries over media queries** | Dashboard widgets resize independently — their content must respond to their own dimensions                  |
-| **Vitest over Karma**                    | Faster execution, modern ESM support, better DX with Angular 21's native builder                             |
-| **`OnPush` on every component**          | Maximizes change detection performance; signals guarantee correct updates                                    |
-| **PrimeNG pass-through API**             | Avoids CSS overrides; styling stays in the template with Tailwind classes                                    |
-| **Gridster2 drag handle**                | Prevents accidental drags when interacting with widget content (charts, buttons)                             |
-| **Lazy-loaded route**                    | Keeps initial bundle lean; dashboard loads on navigation                                                     |
+| Decision                                    | Rationale                                                                                                |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Signals over RxJS for state**             | Simpler mental model, less boilerplate, better Angular 21 integration. RxJS is only used for HTTP calls. |
+| **Repository + Service layering**           | Clear separation between data fetching and business logic — each testable in isolation.                  |
+| **Container Queries over media queries**    | Widgets need to respond to their own size in a resizable grid, not the viewport.                         |
+| **Mock interceptor over in-memory-web-api** | Lighter, more transparent, easier to customize delays and edge cases.                                    |
+| **Vitest over Karma/Jasmine**               | Modern, fast, better DX with native ESM support and Angular 21's new `@angular/build:unit-test` builder. |
+| **PrimeNG Passthrough API**                 | Full layout control over PrimeNG Card internals without fighting the framework's DOM structure.          |
+| **Lord of the Rings theme**                 | Makes the demo memorable and showcases realistic, varied data shapes across all widget types.            |
 
 ---
 
-## Scripts
+## Time Investment
 
-| Command    | Description                              |
-| ---------- | ---------------------------------------- |
-| `ng serve` | Start development server with hot reload |
-| `ng test`  | Run unit tests with Vitest               |
-| `ng build` | Production build (output in `dist/`)     |
+This project was built as a time-boxed assessment. The scope focuses on demonstrating:
+
+1. **Clean architecture** — layered, testable, maintainable
+2. **Modern Angular** — signals, standalone, OnPush, native control flow
+3. **Attention to detail** — design fidelity, loading states, accessibility, responsive behavior
+4. **Code quality** — strict typing, no magic values, immutable updates, thorough tests
+
+Rather than implementing every possible dashboard feature, the goal was to show depth and quality in the features that were built.
