@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardService } from './dashboard.service';
 import { DEFAULT_LAYOUT } from '../data/default-layout';
+import { WIDGET_TYPES } from '../models/widget.model';
 
 describe('DashboardService', () => {
   let service: DashboardService;
@@ -45,7 +46,7 @@ describe('DashboardService', () => {
   });
 
   it('should initialize with default widgets', () => {
-    expect(service.widgets().length).toBe(11);
+    expect(service.widgets().length).toBe(DEFAULT_LAYOUT.widgets.length);
   });
 
   it('should initialize with 6 columns', () => {
@@ -252,7 +253,7 @@ describe('DashboardService', () => {
 
   describe('typeFilter', () => {
     it('should start with all types active', () => {
-      expect(service.typeFilter().size).toBe(5);
+      expect(service.typeFilter().size).toBe(WIDGET_TYPES.length);
     });
 
     it('should toggle a type off', () => {

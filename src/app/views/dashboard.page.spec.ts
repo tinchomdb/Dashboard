@@ -56,7 +56,7 @@ describe('DashboardPage', () => {
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
     const widgetHosts = el.querySelectorAll('app-widget-host');
-    // Default widgets: 6 KPIs + 3 Stats + 1 Radar + 1 Bar = 11
-    expect(widgetHosts.length).toBe(11);
+    // Default widgets: 6 KPIs + 3 Stats + 1 Radar + 1 Bar + 1 Line + 1 Pie + 1 Doughnut + 1 Polar = 15
+    expect(widgetHosts.length).toBe(DEFAULT_LAYOUT.widgets.length);
   });
 });

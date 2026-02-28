@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Gridster, GridsterItem } from 'angular-gridster2';
 import { DashboardHeader } from '../components/dashboard-header/dashboard-header';
-import { WidgetHost } from '../components/widget-host/widget-host';
+import { WidgetHost } from '../components/widget/widget-host';
 import { AddWidgetEvent, WidgetType } from '../models/widget.model';
 import { DashboardService } from '../services/dashboard.service';
 import { UserService } from '../services/user.service';
