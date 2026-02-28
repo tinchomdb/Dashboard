@@ -3,8 +3,8 @@ import { Gridster, GridsterItem } from 'angular-gridster2';
 import { DashboardHeader } from '../components/dashboard-header/dashboard-header';
 import { WidgetHost } from '../components/widget-host/widget-host';
 import { WidgetType } from '../models/widget.model';
-import { DashboardStateService } from '../services/dashboard-state.service';
-import { UserStateService } from '../services/user-state.service';
+import { DashboardService } from '../services/dashboard.service';
+import { UserService } from '../services/user.service';
 @Component({
   selector: 'app-dashboard-page',
   imports: [Gridster, GridsterItem, DashboardHeader, WidgetHost],
@@ -13,8 +13,8 @@ import { UserStateService } from '../services/user-state.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardPage {
-  private readonly dashboardService = inject(DashboardStateService);
-  private readonly userService = inject(UserStateService);
+  private readonly dashboardService = inject(DashboardService);
+  private readonly userService = inject(UserService);
 
   protected readonly filteredWidgets = this.dashboardService.filteredWidgets;
   protected readonly columns = this.dashboardService.columns;

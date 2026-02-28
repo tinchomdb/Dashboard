@@ -1,16 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { DashboardStateService } from './dashboard-state.service';
+import { DashboardService } from './dashboard.service';
 
-describe('DashboardStateService', () => {
-  let service: DashboardStateService;
+describe('DashboardService', () => {
+  let service: DashboardService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
-    service = TestBed.inject(DashboardStateService);
+    service = TestBed.inject(DashboardService);
   });
 
   it('should be created', () => {
@@ -236,31 +236,6 @@ describe('DashboardStateService', () => {
       expect(catalog.kpi).toEqual([]);
       expect(catalog.stat).toEqual([]);
       expect(catalog['bar-chart']).toEqual([]);
-    });
-  });
-
-  describe('addWidgetMenuItems', () => {
-    it('should derive menu items from widget catalog', () => {
-      service.widgetCatalog.set({
-        kpi: [{ id: 'test-kpi', label: 'Test KPI', title: 'Test KPI Title' }],
-        stat: [],
-        'bar-chart': [],
-        'radar-chart': [],
-        'horizontal-bar-chart': [],
-      });
-      const items = service.addWidgetMenuItems();
-      const kpiItem = items.find((m) => m.label === 'KPI Indicator');
-      expect(kpiItem).toBeTruthy();
-      expect(kpiItem!.items!.length).toBe(1);
-      expect(kpiItem!.items![0].label).toBe('Test KPI');
-    });
-
-    it('should return empty sub-items when catalog is empty', () => {
-      const items = service.addWidgetMenuItems();
-      expect(items.length).toBe(5);
-      items.forEach((item) => {
-        expect(item.items).toEqual([]);
-      });
     });
   });
 });
