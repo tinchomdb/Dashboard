@@ -13,11 +13,14 @@ import {
 const DELAY_MIN = 1000;
 const DELAY_MAX = 2000;
 const LAYOUT_STORAGE_KEY = 'dashboard-user-layout';
+const LAST_LOGIN_STORAGE_KEY = 'dashboard-last-login';
 
 export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
-  // User profile
+  // User profile: inject persisted last-login, then store current timestamp
   if (req.url === '/api/user-profile') {
-    return respond(MOCK_USER_PROFILE, 0);
+    const lastLogin = readLastLogin();
+    storeLastLogin();
+    return respond({ ...MOCK_USER_PROFILE, lastLogin }, 0);
   }
 
   // User layout: read from localStorage, fall back to default
@@ -91,6 +94,31 @@ function readStoredLayout(): UserDashboardLayout {
   } catch {
     return DEFAULT_LAYOUT;
   }
+}
+
+/**
+ * Reads the persisted last-login timestamp from localStorage.
+ * Returns the mock default on first visit.
+ */
+function readLastLogin(): string {
+  return localStorage.getItem(LAST_LOGIN_STORAGE_KEY) ?? MOCK_USER_PROFILE.lastLogin;
+}
+
+/** Stores the current date/time as last-login for the next session. */
+function storeLastLogin(): void {
+  const now = new Date();
+  const formatted =
+    now.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+    }) +
+    ' at ' +
+    now.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+  localStorage.setItem(LAST_LOGIN_STORAGE_KEY, formatted);
 }
 
 function isValidLayout(value: unknown): value is UserDashboardLayout {

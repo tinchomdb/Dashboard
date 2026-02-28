@@ -82,6 +82,28 @@ describe('MockApiInterceptor', () => {
     expect(profile.lastLogin).toBeDefined();
   });
 
+  it('should persist last login in localStorage and return it on next request', () => {
+    // First request — no stored login, should use mock default
+    let first: unknown;
+    httpClient.get('/api/user-profile').subscribe((data) => (first = data));
+    vi.advanceTimersByTime(TICK_DELAY);
+
+    const firstProfile = first as { lastLogin: string };
+    expect(firstProfile.lastLogin).toBe('February 27 at 8:15am CET');
+
+    // localStorage should now contain a fresh timestamp
+    expect(localStorage.getItem('dashboard-last-login')).toBeTruthy();
+
+    // Second request — should return the stored timestamp, not the mock default
+    let second: unknown;
+    httpClient.get('/api/user-profile').subscribe((data) => (second = data));
+    vi.advanceTimersByTime(TICK_DELAY);
+
+    const secondProfile = second as { lastLogin: string };
+    expect(secondProfile.lastLogin).not.toBe('February 27 at 8:15am CET');
+    expect(secondProfile.lastLogin).toContain(' at ');
+  });
+
   it('should return widget catalog for /api/widget-catalog', () => {
     let result: unknown;
     httpClient.get('/api/widget-catalog').subscribe((data) => (result = data));
