@@ -9,7 +9,11 @@ describe('Widget Model', () => {
       expect(WIDGET_TYPES).toContain('bar-chart');
       expect(WIDGET_TYPES).toContain('radar-chart');
       expect(WIDGET_TYPES).toContain('horizontal-bar-chart');
-      expect(WIDGET_TYPES.length).toBe(5);
+      expect(WIDGET_TYPES).toContain('line-chart');
+      expect(WIDGET_TYPES).toContain('pie-chart');
+      expect(WIDGET_TYPES).toContain('doughnut-chart');
+      expect(WIDGET_TYPES).toContain('polar-area-chart');
+      expect(WIDGET_TYPES.length).toBe(9);
     });
   });
 
@@ -39,12 +43,12 @@ describe('Widget Model', () => {
       }
     });
 
-    it('should have 6 KPI variants', () => {
-      expect(WIDGET_MOCK_DATA.kpi.length).toBe(6);
+    it('should have 9 KPI variants', () => {
+      expect(WIDGET_MOCK_DATA.kpi.length).toBe(9);
     });
 
-    it('should have 3 stat variants', () => {
-      expect(WIDGET_MOCK_DATA.stat.length).toBe(3);
+    it('should have 6 stat variants', () => {
+      expect(WIDGET_MOCK_DATA.stat.length).toBe(6);
     });
 
     it('should have unique IDs within each type', () => {

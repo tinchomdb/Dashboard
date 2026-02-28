@@ -8,11 +8,15 @@ export const WIDGET_TYPES = [
   'bar-chart',
   'radar-chart',
   'horizontal-bar-chart',
+  'line-chart',
+  'pie-chart',
+  'doughnut-chart',
+  'polar-area-chart',
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];
 
-export type ChartType = 'bar' | 'radar';
+export type ChartType = 'bar' | 'radar' | 'line' | 'pie' | 'doughnut' | 'polarArea';
 
 export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast';
 
@@ -106,6 +110,30 @@ export const WIDGET_TYPE_CONFIG: Record<WidgetType, WidgetTypeConfig> = {
     label: 'Horizontal Bar Chart',
     icon: 'pi pi-chart-bar',
     cols: 3,
+    rows: 3,
+  },
+  'line-chart': {
+    label: 'Line Chart',
+    icon: 'pi pi-chart-line',
+    cols: 3,
+    rows: 3,
+  },
+  'pie-chart': {
+    label: 'Pie Chart',
+    icon: 'pi pi-chart-pie',
+    cols: 2,
+    rows: 3,
+  },
+  'doughnut-chart': {
+    label: 'Doughnut Chart',
+    icon: 'pi pi-circle',
+    cols: 2,
+    rows: 3,
+  },
+  'polar-area-chart': {
+    label: 'Polar Area Chart',
+    icon: 'pi pi-compass',
+    cols: 2,
     rows: 3,
   },
 };

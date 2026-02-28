@@ -24,5 +24,11 @@ export const DEFAULT_LAYOUT: UserDashboardLayout = {
     { type: 'radar-chart', variantId: 'fellowship-skills', x: 3, y: 1 },
     // Row 3, Cols 0–2: Horizontal bar chart
     { type: 'horizontal-bar-chart', variantId: 'battle-casualties', x: 0, y: 3 },
+    // Row 6: Line chart + Pie chart
+    { type: 'line-chart', variantId: 'ring-corruption', x: 0, y: 6 },
+    { type: 'pie-chart', variantId: 'ring-distribution', x: 3, y: 6 },
+    // Row 9: Doughnut chart + Polar area chart
+    { type: 'doughnut-chart', variantId: 'territory-control', x: 0, y: 9 },
+    { type: 'polar-area-chart', variantId: 'fortress-strength', x: 2, y: 9 },
   ],
 };
