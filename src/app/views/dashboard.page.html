@@ -1,15 +1,16 @@
-<div class="flex flex-col h-screen p-lg bg-surface-ground overflow-hidden">
+<div class="flex flex-col h-screen p-lg overflow-hidden">
   <app-dashboard-header
     [userName]="userProfile().name"
     [lastLogin]="userProfile().lastLogin"
     [columns]="columns()"
     [activeFilters]="typeFilter()"
-    [addWidgetMenuItems]="addWidgetMenuItems()"
+    [widgetCatalog]="widgetCatalog()"
+    (addWidget)="onAddWidget($event)"
     (columnsChange)="onColumnsChange($event)"
     (toggleFilter)="onToggleFilter($event)"
   />
 
-  <gridster [options]="gridOptions()">
+  <gridster class="flex-1 min-h-0 !bg-transparent" [options]="gridOptions()">
     @for (widget of filteredWidgets(); track widget.id) {
       <gridster-item [item]="widget">
         <app-widget-host [widget]="widget" (remove)="onRemoveWidget($event)" />

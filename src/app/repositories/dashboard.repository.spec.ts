@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { WidgetDataRepository } from './widget-data.repository';
+import { DashboardRepository } from './dashboard.repository';
 
-describe('WidgetDataRepository', () => {
-  let repository: WidgetDataRepository;
+describe('DashboardRepository', () => {
+  let repository: DashboardRepository;
   let httpTesting: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
-    repository = TestBed.inject(WidgetDataRepository);
+    repository = TestBed.inject(DashboardRepository);
     httpTesting = TestBed.inject(HttpTestingController);
   });
 
@@ -37,7 +37,7 @@ describe('WidgetDataRepository', () => {
   });
 
   it('should fetch widget catalog from /api/widget-catalog', () => {
-    const mockCatalog = { kpi: [{ id: 'test', label: 'Test', title: 'Test' }] };
+    const mockCatalog = { kpi: [{ id: 'test', title: 'Test' }] };
     let result: unknown;
 
     repository.fetchWidgetCatalog().subscribe((data) => (result = data));
@@ -67,5 +67,29 @@ describe('WidgetDataRepository', () => {
     const req = httpTesting.expectOne('/api/radar-chart/fellowship-skills');
     expect(req.request.url).toBe('/api/radar-chart/fellowship-skills');
     req.flush({});
+  });
+
+  it('should fetch user layout from /api/user-layout', () => {
+    const mockLayout = [{ type: 'kpi' as const, variantId: 'fellowship-count', x: 0, y: 0 }];
+    let result: unknown;
+
+    repository.fetchUserLayout().subscribe((data) => (result = data));
+
+    const req = httpTesting.expectOne('/api/user-layout');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockLayout);
+
+    expect(result).toEqual(mockLayout);
+  });
+
+  it('should save user layout via PUT /api/user-layout', () => {
+    const layout = [{ type: 'kpi' as const, variantId: 'fellowship-count', x: 0, y: 0 }];
+
+    repository.saveUserLayout(layout).subscribe();
+
+    const req = httpTesting.expectOne('/api/user-layout');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(layout);
+    req.flush(null);
   });
 });

@@ -1,16 +1,43 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardService } from './dashboard.service';
+import { DEFAULT_LAYOUT } from '../data/default-layout';
 
 describe('DashboardService', () => {
   let service: DashboardService;
+  let httpTesting: HttpTestingController;
+
+  /**
+   * Flushes the constructor-initiated HTTP requests so that
+   * the service is fully initialised before each test runs.
+   */
+  function flushInitRequests(): void {
+    // The constructor fires GET /api/user-layout and GET /api/widget-catalog
+    httpTesting.expectOne('/api/user-layout').flush(DEFAULT_LAYOUT);
+    httpTesting.expectOne('/api/widget-catalog').flush([]);
+
+    // Each widget in the layout triggers a GET /api/{type}/{variantId}
+    const dataReqs = httpTesting.match(
+      (req) =>
+        req.url.startsWith('/api/') &&
+        req.url !== '/api/user-layout' &&
+        req.url !== '/api/widget-catalog',
+    );
+    dataReqs.forEach((req) => req.flush({ title: 'Mock', value: 0 }));
+  }
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
+    httpTesting = TestBed.inject(HttpTestingController);
     service = TestBed.inject(DashboardService);
+    flushInitRequests();
+  });
+
+  afterEach(() => {
+    httpTesting.verify();
   });
 
   it('should be created', () => {
@@ -29,17 +56,25 @@ describe('DashboardService', () => {
     it('should add a widget and increase count', () => {
       const initialCount = service.widgets().length;
       service.addWidget({ type: 'kpi', variantId: 'fellowship-count' });
+      httpTesting.expectOne('/api/kpi/fellowship-count').flush({ title: 'Mock', value: 0 });
+      httpTesting.expectOne({ method: 'PUT', url: '/api/user-layout' }).flush(null);
       expect(service.widgets().length).toBe(initialCount + 1);
     });
 
     it('should return the newly created widget', () => {
       const widget = service.addWidget({ type: 'stat', variantId: 'orc-armies' });
+      httpTesting.expectOne('/api/stat/orc-armies').flush({ title: 'Mock', value: 0 });
+      httpTesting.expectOne({ method: 'PUT', url: '/api/user-layout' }).flush(null);
       expect(widget.type).toBe('stat');
       expect(widget.loading).toBe(true);
     });
 
     it('should add widget of correct type', () => {
       const widget = service.addWidget({ type: 'radar-chart', variantId: 'fellowship-skills' });
+      httpTesting
+        .expectOne('/api/radar-chart/fellowship-skills')
+        .flush({ title: 'Mock', value: 0 });
+      httpTesting.expectOne({ method: 'PUT', url: '/api/user-layout' }).flush(null);
       const found = service.widgets().find((w) => w.id === widget.id);
       expect(found).toBeTruthy();
       expect(found!.type).toBe('radar-chart');
@@ -53,6 +88,7 @@ describe('DashboardService', () => {
       const initialCount = widgets.length;
 
       service.removeWidget(target.id);
+      httpTesting.expectOne({ method: 'PUT', url: '/api/user-layout' }).flush(null);
       expect(service.widgets().length).toBe(initialCount - 1);
       expect(service.widgets().find((w) => w.id === target.id)).toBeUndefined();
     });
@@ -60,6 +96,7 @@ describe('DashboardService', () => {
     it('should not change list when id does not exist', () => {
       const initialCount = service.widgets().length;
       service.removeWidget('nonexistent-id');
+      httpTesting.expectOne({ method: 'PUT', url: '/api/user-layout' }).flush(null);
       expect(service.widgets().length).toBe(initialCount);
     });
   });
@@ -86,14 +123,20 @@ describe('DashboardService', () => {
     });
   });
 
+  function flushSaveRequest(): void {
+    httpTesting.expectOne({ method: 'PUT', url: '/api/user-layout' }).flush(null);
+  }
+
   describe('updateColumns', () => {
     it('should update column count', () => {
       service.updateColumns(8);
+      flushSaveRequest();
       expect(service.columns()).toBe(8);
     });
 
     it('should update maxCols and minCols on the grid options signal', () => {
       service.updateColumns(4);
+      flushSaveRequest();
       expect(service.gridOptions().maxCols).toBe(4);
       expect(service.gridOptions().minCols).toBe(4);
     });
@@ -101,12 +144,14 @@ describe('DashboardService', () => {
     it('should clamp widget cols that exceed new column count', () => {
       // Default radar-chart has cols=3; reducing to 2 should clamp it
       service.updateColumns(2);
+      flushSaveRequest();
       const wideWidgets = service.widgets().filter((w) => w.cols > 2);
       expect(wideWidgets.length).toBe(0);
     });
 
     it('should update maxItemCols to match column count', () => {
       service.updateColumns(3);
+      flushSaveRequest();
       expect(service.gridOptions().maxItemCols).toBe(3);
     });
 
@@ -115,6 +160,7 @@ describe('DashboardService', () => {
       service.updateWidget(service.widgets()[0].id, { x: 3, cols: 1 });
       // Shrink to 2 columns: x=3 with cols=1 exceeds grid (3+1 > 2)
       service.updateColumns(2);
+      flushSaveRequest();
       const widget = service.widgets()[0];
       expect(widget.x + widget.cols).toBeLessThanOrEqual(2);
     });
@@ -123,6 +169,7 @@ describe('DashboardService', () => {
       // 6 KPI cards at x=0..5, y=0 — reducing to 3 columns should push
       // overflow cards to new rows rather than stacking
       service.updateColumns(3);
+      flushSaveRequest();
       const positions = service.widgets().map((w) => `${w.x},${w.y}`);
       const uniquePositions = new Set(positions);
       // No two widgets should share the exact same top-left corner
@@ -131,6 +178,7 @@ describe('DashboardService', () => {
 
     it('should not create any cell overlap between widgets', () => {
       service.updateColumns(2);
+      flushSaveRequest();
       const widgets = service.widgets();
       let hasOverlap = false;
       for (let i = 0; i < widgets.length; i++) {
@@ -154,6 +202,7 @@ describe('DashboardService', () => {
       // The first KPI (originally x=0,y=0) should remain at or near the top
       const firstKpi = service.widgets()[0];
       service.updateColumns(3);
+      flushSaveRequest();
       const updated = service.widgets().find((w) => w.id === firstKpi.id)!;
       expect(updated.y).toBe(0);
       expect(updated.x).toBe(0);
@@ -161,6 +210,7 @@ describe('DashboardService', () => {
 
     it('should stack all widgets vertically when reduced to 1 column', () => {
       service.updateColumns(1);
+      flushSaveRequest();
       const widgets = service.widgets();
       // Every widget should have x=0 and cols clamped to 1
       for (const w of widgets) {
@@ -231,11 +281,8 @@ describe('DashboardService', () => {
   });
 
   describe('widgetCatalog', () => {
-    it('should initialize with empty arrays for each type', () => {
-      const catalog = service.widgetCatalog();
-      expect(catalog.kpi).toEqual([]);
-      expect(catalog.stat).toEqual([]);
-      expect(catalog['bar-chart']).toEqual([]);
+    it('should initialize with an empty array', () => {
+      expect(service.widgetCatalog()).toEqual([]);
     });
   });
 });

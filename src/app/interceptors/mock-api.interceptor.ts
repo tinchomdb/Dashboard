@@ -1,13 +1,21 @@
 import { HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { delay, of } from 'rxjs';
 import { MOCK_USER_PROFILE, WIDGET_MOCK_DATA } from '../data/mock-data';
-import { WidgetType, WIDGET_TYPES } from '../models/widget.model';
+import { DEFAULT_LAYOUT } from '../data/default-layout';
+import {
+  WidgetCatalogGroup,
+  WidgetLayoutItem,
+  WidgetType,
+  WIDGET_TYPE_CONFIG,
+  WIDGET_TYPES,
+} from '../models/widget.model';
 
-const DELAY_MIN = 500;
-const DELAY_MAX = 1500;
+const DELAY_MIN = 1000;
+const DELAY_MAX = 2000;
+const LAYOUT_STORAGE_KEY = 'dashboard-user-layout';
 
 function randomDelay(): number {
-  return Math.floor((Math.random() * (DELAY_MIN + DELAY_MAX)) / 2);
+  return DELAY_MIN + Math.floor(Math.random() * (DELAY_MAX - DELAY_MIN));
 }
 
 function respond(body: unknown) {
@@ -20,17 +28,33 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
     return respond(MOCK_USER_PROFILE);
   }
 
-  // Widget catalog: returns { id, label, title, subtitle } per type
+  // User layout: read from localStorage, fall back to default
+  if (req.url === '/api/user-layout' && req.method === 'GET') {
+    const stored = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    const layout: WidgetLayoutItem[] = stored ? JSON.parse(stored) : DEFAULT_LAYOUT;
+    return respond(layout);
+  }
+
+  // User layout save: persist to localStorage
+  if (req.url === '/api/user-layout' && req.method === 'PUT') {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(req.body));
+    return of(new HttpResponse({ status: 204, body: null })).pipe(delay(randomDelay()));
+  }
+
+  // Widget catalog: returns grouped menu-ready catalog
   if (req.url === '/api/widget-catalog') {
-    const catalog: Record<string, unknown[]> = {};
-    for (const type of WIDGET_TYPES) {
-      catalog[type] = WIDGET_MOCK_DATA[type].map(({ id, label, title, subtitle }) => ({
-        id,
-        label,
-        title,
-        ...(subtitle ? { subtitle } : {}),
-      }));
-    }
+    const catalog: WidgetCatalogGroup[] = WIDGET_TYPES.map((type) => {
+      const config = WIDGET_TYPE_CONFIG[type];
+      return {
+        label: config.label,
+        icon: config.icon,
+        items: WIDGET_MOCK_DATA[type].map((entry) => ({
+          label: entry.title,
+          type,
+          variantId: entry.id,
+        })),
+      };
+    });
     return respond(catalog);
   }
 
@@ -43,7 +67,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   if (entries) {
     const entry = entries.find((e) => e.id === variantId);
     if (entry) {
-      const { id, label, title, subtitle, ...payload } = entry;
+      const { id, ...payload } = entry;
       return respond(payload);
     }
   }

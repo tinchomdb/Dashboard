@@ -39,7 +39,6 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Do NOT use `ngClass`, use `class` bindings instead
 - Do NOT use `ngStyle`, use `style` bindings instead
 - When using external templates/styles, use paths relative to the component TS file.
-- Split components in 3 files
 - Keep UI components dumb and agnostic of the application state. They should only receive data via inputs and emit events via outputs.
 
 ## State Management
@@ -67,7 +66,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## Style
 
 - Use Tailwind CSS for styling.
-- Use semantic naming for classes and avoid utility classes in templates.
+- Use semantic naming for tokens.
 - Put tokens as CSS variables (:root and theme files). Use semantic names (e.g. --color-primary, --surface-1, --radius-md, --font-ui). Tailwind v4 exposes tokens as CSS variables so utilities like bg-primary map to them.
 - All design values must come from CSS variables (design tokens). No hardcoded colors, spacing, font sizes, border radius, shadows.
 - No Hardcoded Utilities: Do not use literal color names (e.g., bg-blue-500) or specific spacing (e.g., p-4). Use only semantic tokens defined in our theme (e.g., bg-surface-main, text-text-secondary, p-spacing-md).

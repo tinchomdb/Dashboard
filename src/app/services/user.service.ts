@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { WidgetDataRepository } from '../repositories/widget-data.repository';
-import { UserProfile } from '../models/widget.model';
+import { DashboardRepository } from '../repositories/dashboard.repository';
+import { UserProfile } from '../models/user.model';
 
 /**
  * Manages user profile state.
@@ -8,7 +8,7 @@ import { UserProfile } from '../models/widget.model';
  */
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly repository = inject(WidgetDataRepository);
+  private readonly repository = inject(DashboardRepository);
 
   readonly userProfile = signal<UserProfile>({ name: '', lastLogin: '' });
 
@@ -19,6 +19,7 @@ export class UserService {
   private loadUserProfile(): void {
     this.repository.fetchUserProfile().subscribe({
       next: (profile) => this.userProfile.set(profile),
+      error: (err) => console.error('Failed to load user profile', err),
     });
   }
 }

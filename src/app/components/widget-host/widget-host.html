@@ -34,7 +34,7 @@
       [text]="true"
       severity="secondary"
       size="small"
-      (onClick)="actionsOpen.set(!actionsOpen())"
+      (onClick)="actionsOpen.update(v => !v)"
       aria-label="Widget actions"
     />
   </div>
@@ -47,20 +47,15 @@
     </div>
   } @else {
     @if (widget().type === 'kpi') {
-      <app-kpi-card [title]="widget().title" [value]="$any(widget().data)?.value ?? '--'" />
+      <app-kpi-card [title]="widget().title" [value]="displayValue()" />
     } @else if (widget().type === 'stat') {
-      <app-stat-card
-        [title]="widget().title"
-        [value]="$any(widget().data)?.value ?? '--'"
-        [badge]="$any(widget().data)?.badge"
-        [badgeSeverity]="$any(widget().data)?.badgeSeverity ?? 'info'"
-      />
+      <app-stat-card [title]="widget().title" [value]="displayValue()" [badge]="statBadge()" />
     } @else if (isChartWidget()) {
       <app-chart-card
         [title]="widget().title"
         [subtitle]="widget().subtitle"
         [chartType]="chartType()"
-        [chartData]="$any(widget().data)"
+        [chartData]="chartData()"
         [chartOptions]="chartOptions()"
       />
     }

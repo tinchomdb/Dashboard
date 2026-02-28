@@ -1,4 +1,4 @@
-import { WIDGET_TYPES, WIDGET_TYPE_LABELS, WIDGET_TYPE_DEFAULTS } from './widget.model';
+import { WIDGET_TYPES, WIDGET_TYPE_CONFIG } from './widget.model';
 import { WIDGET_MOCK_DATA } from '../data/mock-data';
 
 describe('Widget Model', () => {
@@ -13,25 +13,22 @@ describe('Widget Model', () => {
     });
   });
 
-  describe('WIDGET_TYPE_LABELS', () => {
+  describe('WIDGET_TYPE_CONFIG', () => {
     it('should have a label for every widget type', () => {
       for (const type of WIDGET_TYPES) {
-        expect(WIDGET_TYPE_LABELS[type]).toBeTruthy();
+        expect(WIDGET_TYPE_CONFIG[type].label).toBeTruthy();
       }
     });
-  });
 
-  describe('WIDGET_TYPE_DEFAULTS', () => {
     it('should have default dimensions for every widget type', () => {
       for (const type of WIDGET_TYPES) {
-        const defaults = WIDGET_TYPE_DEFAULTS[type];
-        expect(defaults.cols).toBeGreaterThan(0);
-        expect(defaults.rows).toBeGreaterThan(0);
+        expect(WIDGET_TYPE_CONFIG[type].cols).toBeGreaterThan(0);
+        expect(WIDGET_TYPE_CONFIG[type].rows).toBeGreaterThan(0);
       }
     });
 
     it('should have stat cards at 2 rows', () => {
-      expect(WIDGET_TYPE_DEFAULTS.stat.rows).toBe(2);
+      expect(WIDGET_TYPE_CONFIG.stat.rows).toBe(2);
     });
   });
 
@@ -61,7 +58,6 @@ describe('Widget Model', () => {
       for (const type of WIDGET_TYPES) {
         for (const variant of WIDGET_MOCK_DATA[type]) {
           expect(variant.title).toBeTruthy();
-          expect(variant.label).toBeTruthy();
         }
       }
     });

@@ -1,4 +1,6 @@
-<header class="flex items-start justify-between gap-md mb-lg p-md">
+<header
+  class="flex flex-col @[800px]:flex-row @[800px]:items-start @[800px]:justify-between gap-md mb-lg p-md"
+>
   <div>
     <h1 class="text-2xl font-bold text-text-primary flex items-center gap-sm">
       <i class="pi pi-clock text-primary"></i>
@@ -9,7 +11,7 @@
     </p>
   </div>
 
-  <div class="flex items-center gap-sm">
+  <div class="flex items-center gap-sm flex-wrap">
     <div class="flex items-center gap-xs">
       <label for="grid-columns" class="text-sm text-text-secondary whitespace-nowrap"
         >Columns</label
@@ -49,7 +51,7 @@
   </div>
 </header>
 
-<!-- Popup overlays — kept outside flex layout to avoid gap artifacts -->
+<!-- Popup overlays -->
 <p-popover #filterPopover>
   <div class="flex flex-col gap-sm p-xs" (click)="$event.stopPropagation()">
     <span class="text-sm font-semibold text-text-primary">Show widget types</span>
@@ -69,7 +71,7 @@
 
 <p-menu
   #addMenu
-  [model]="addWidgetMenuItems()"
+  [model]="menuItems()"
   [popup]="true"
   [pt]="{ itemLink: { class: '!pl-lg !py-2xs text-sm' } }"
 >

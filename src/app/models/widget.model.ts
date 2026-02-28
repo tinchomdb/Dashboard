@@ -1,6 +1,6 @@
 import { GridsterItemConfig } from 'angular-gridster2';
 
-// ── Types ──
+// ── Literal unions & derived types (can only be expressed as `type`) ──
 
 export const WIDGET_TYPES = [
   'kpi',
@@ -12,24 +12,64 @@ export const WIDGET_TYPES = [
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];
 
-export type ChartType = 'bar' | 'line' | 'radar' | 'pie' | 'doughnut' | 'polarArea';
+export type ChartType = 'bar' | 'radar';
 
 export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast';
 
-// ── Interfaces ──
+// ── Data-shape interfaces (plain object contracts → `interface`) ──
 
-export interface UserProfile {
-  name: string;
-  lastLogin: string;
+export interface Badge {
+  value: string;
+  severity: TagSeverity;
 }
 
-/** A single widget variant entry with metadata and payload. */
-export interface WidgetEntry {
-  id: string;
+export interface KpiData {
+  value: string | number;
+}
+
+export interface StatData {
+  value: string | number;
+  badge?: Badge;
+}
+
+export interface ChartData {
+  labels: string[];
+  datasets: Record<string, unknown>[];
+}
+
+// ── Composite data types (unions / intersections → `type`) ──
+
+export type WidgetData = KpiData | StatData | ChartData;
+
+/** API response shape: title metadata merged with payload. */
+export type WidgetDataResponse = { title: string; subtitle?: string } & WidgetData;
+
+/** A single widget variant entry stored in mock data or backend. */
+export type WidgetEntry = { id: string } & WidgetDataResponse;
+
+// ── Domain interfaces (object shapes, base → derived order) ──
+
+/** A persisted widget placement as stored/returned by the API. */
+export interface WidgetLayoutItem {
+  type: WidgetType;
+  variantId: string;
+  x: number;
+  y: number;
+}
+
+export interface AddWidgetEvent {
+  type: WidgetType;
+  variantId: string;
+}
+
+export interface WidgetCatalogItem extends AddWidgetEvent {
   label: string;
-  title: string;
-  subtitle?: string;
-  [key: string]: unknown;
+}
+
+export interface WidgetCatalogGroup {
+  label: string;
+  icon: string;
+  items: WidgetCatalogItem[];
 }
 
 export interface DashboardWidget extends GridsterItemConfig {
@@ -39,28 +79,27 @@ export interface DashboardWidget extends GridsterItemConfig {
   title: string;
   subtitle?: string;
   loading: boolean;
-  data: unknown;
-}
-
-export interface AddWidgetEvent {
-  type: WidgetType;
-  variantId: string;
+  data: WidgetData | null;
 }
 
 // ── Constants ──
 
-export const WIDGET_TYPE_LABELS: Record<WidgetType, string> = {
-  kpi: 'KPI Indicator',
-  stat: 'Stat Card',
-  'bar-chart': 'Bar Chart',
-  'radar-chart': 'Radar Chart',
-  'horizontal-bar-chart': 'Horizontal Bar Chart',
-};
+interface WidgetTypeConfig {
+  label: string;
+  icon: string;
+  cols: number;
+  rows: number;
+}
 
-export const WIDGET_TYPE_DEFAULTS: Record<WidgetType, { cols: number; rows: number }> = {
-  kpi: { cols: 1, rows: 1 },
-  stat: { cols: 1, rows: 2 },
-  'bar-chart': { cols: 3, rows: 3 },
-  'radar-chart': { cols: 3, rows: 5 },
-  'horizontal-bar-chart': { cols: 3, rows: 3 },
+export const WIDGET_TYPE_CONFIG: Record<WidgetType, WidgetTypeConfig> = {
+  kpi: { label: 'KPI Indicator', icon: 'pi pi-hashtag', cols: 1, rows: 1 },
+  stat: { label: 'Stat Card', icon: 'pi pi-chart-pie', cols: 1, rows: 2 },
+  'bar-chart': { label: 'Bar Chart', icon: 'pi pi-chart-bar', cols: 3, rows: 3 },
+  'radar-chart': { label: 'Radar Chart', icon: 'pi pi-chart-scatter', cols: 3, rows: 5 },
+  'horizontal-bar-chart': {
+    label: 'Horizontal Bar Chart',
+    icon: 'pi pi-chart-bar',
+    cols: 3,
+    rows: 3,
+  },
 };

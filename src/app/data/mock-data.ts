@@ -1,4 +1,5 @@
-import { UserProfile, WidgetType, WidgetEntry } from '../models/widget.model';
+import { WidgetType, WidgetEntry } from '../models/widget.model';
+import { UserProfile } from '../models/user.model';
 
 // ── User Profile ──
 
@@ -7,57 +8,40 @@ export const MOCK_USER_PROFILE: UserProfile = {
   lastLogin: 'February 27 at 8:15am CET',
 };
 
-// ── Single Source of Truth: widget metadata + mock responses ──
+// ── Widget Mock Data ──
 
 export const WIDGET_MOCK_DATA: Record<WidgetType, WidgetEntry[]> = {
   kpi: [
-    {
-      id: 'fellowship-count',
-      label: 'Fellowship Members',
-      title: 'Fellowship Members',
-      value: 9,
-    },
-    {
-      id: 'rings-of-power',
-      label: 'Rings of Power',
-      title: 'Rings of Power',
-      value: 20,
-    },
-    { id: 'battles-won', label: 'Battles Won', title: 'Battles Won', value: 6 },
-    { id: 'realms', label: 'Realms of Middle-earth', title: 'Realms', value: 7 },
-    { id: 'dark-lords', label: 'Dark Lords', title: 'Dark Lords', value: 2 },
-    { id: 'wizards', label: 'Istari (Wizards)', title: 'Wizards', value: 5 },
+    { id: 'fellowship-count', title: 'Fellowship Members', value: 9 },
+    { id: 'rings-of-power', title: 'Rings of Power', value: 20 },
+    { id: 'battles-won', title: 'Battles Won', value: 6 },
+    { id: 'realms', title: 'Realms of Middle-earth', value: 7 },
+    { id: 'dark-lords', title: 'Dark Lords', value: 2 },
+    { id: 'wizards', title: 'Istari (Wizards)', value: 5 },
   ],
   stat: [
     {
       id: 'orc-armies',
-      label: 'Orc Army Size',
       title: 'Orc Armies',
       value: '~150,000',
-      badge: 'Mordor',
-      badgeSeverity: 'danger',
+      badge: { value: 'Mordor', severity: 'danger' },
     },
     {
       id: 'elf-population',
-      label: 'Elf Population',
       title: 'Elven Population',
       value: '~10,000',
-      badge: 'Declining',
-      badgeSeverity: 'warn',
+      badge: { value: 'Declining', severity: 'warn' },
     },
     {
       id: 'hobbit-meals',
-      label: 'Hobbit Daily Meals',
       title: 'Hobbit Meals',
       value: '7/day',
-      badge: 'On Track',
-      badgeSeverity: 'success',
+      badge: { value: 'On Track', severity: 'success' },
     },
   ],
   'bar-chart': [
     {
       id: 'faction-armies',
-      label: 'Faction Armies',
       title: 'Army Sizes by Faction',
       subtitle: 'Forces in the War of the Ring',
       labels: ['Gondor', 'Rohan', 'Mordor', 'Isengard', 'Elves', 'Dwarves'],
@@ -81,7 +65,6 @@ export const WIDGET_MOCK_DATA: Record<WidgetType, WidgetEntry[]> = {
   'radar-chart': [
     {
       id: 'fellowship-skills',
-      label: 'Fellowship Skills',
       title: 'Fellowship Skills',
       subtitle: 'Combat abilities of key members',
       labels: ['Swordsmanship', 'Archery', 'Magic', 'Stealth', 'Diplomacy', 'Endurance'],
@@ -113,7 +96,6 @@ export const WIDGET_MOCK_DATA: Record<WidgetType, WidgetEntry[]> = {
   'horizontal-bar-chart': [
     {
       id: 'battle-casualties',
-      label: 'Battle Casualties',
       title: 'Battle Casualties',
       subtitle: 'Losses in major battles of the Third Age',
       labels: ["Helm's Deep", 'Pelennor Fields', 'Black Gate', 'Isengard', 'Moria'],

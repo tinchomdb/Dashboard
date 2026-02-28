@@ -55,7 +55,7 @@ describe('WidgetHost', () => {
       createMockWidget({
         type: 'stat',
         loading: false,
-        data: { value: '100%', badge: 'OK', badgeSeverity: 'success' },
+        data: { value: '100%', badge: { value: 'OK', severity: 'success' } },
       }),
     );
     fixture.detectChanges();

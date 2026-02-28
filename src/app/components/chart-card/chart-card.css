@@ -1,5 +1,0 @@
-/* Ensure PrimeNG chart host element participates in flex height chain */
-:host p-chart {
-  display: block;
-  height: 100%;
-}

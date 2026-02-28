@@ -6,7 +6,13 @@ import { PopoverModule } from 'primeng/popover';
 import { CheckboxModule } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
 import { MenuItem } from 'primeng/api';
-import { WIDGET_TYPE_LABELS, WIDGET_TYPES, WidgetType } from '../../models/widget.model';
+import {
+  AddWidgetEvent,
+  WidgetCatalogGroup,
+  WIDGET_TYPE_CONFIG,
+  WIDGET_TYPES,
+  WidgetType,
+} from '../../models/widget.model';
 
 @Component({
   selector: 'app-dashboard-header',
@@ -20,22 +26,36 @@ import { WIDGET_TYPE_LABELS, WIDGET_TYPES, WidgetType } from '../../models/widge
   ],
   templateUrl: './dashboard-header.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: 'container-type: inline-size' },
 })
 export class DashboardHeader {
   userName = input('');
   lastLogin = input('');
   columns = input(6);
   activeFilters = input<ReadonlySet<WidgetType>>(new Set(WIDGET_TYPES));
-  addWidgetMenuItems = input<MenuItem[]>([]);
+  widgetCatalog = input<WidgetCatalogGroup[]>([]);
 
   columnsChange = output<number>();
   toggleFilter = output<WidgetType>();
+  addWidget = output<AddWidgetEvent>();
+
+  /* Maps widget catalog groups to PrimeNG menu items */
+  protected readonly menuItems = computed<MenuItem[]>(() =>
+    this.widgetCatalog().map((group) => ({
+      label: group.label,
+      icon: group.icon,
+      items: group.items.map((item) => ({
+        label: item.label,
+        command: () => this.addWidget.emit({ type: item.type, variantId: item.variantId }),
+      })),
+    })),
+  );
 
   protected readonly filterItems = computed(() => {
     const active = this.activeFilters();
     return WIDGET_TYPES.map((type) => ({
       type,
-      label: WIDGET_TYPE_LABELS[type],
+      label: WIDGET_TYPE_CONFIG[type].label,
       active: active.has(type),
     }));
   });

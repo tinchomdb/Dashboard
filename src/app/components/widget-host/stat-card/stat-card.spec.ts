@@ -35,7 +35,7 @@ describe('StatCard', () => {
   it('should render badge when provided', () => {
     const fixture = TestBed.createComponent(StatCard);
     fixture.componentRef.setInput('title', 'Test');
-    fixture.componentRef.setInput('badge', 'Mordor');
+    fixture.componentRef.setInput('badge', { value: 'Mordor', severity: 'danger' });
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.textContent).toContain('Mordor');

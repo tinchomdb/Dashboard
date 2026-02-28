@@ -1,8 +1,8 @@
 <p-card [header]="title()" [pt]="cardPt">
   <div class="stat-content flex flex-col items-center justify-center gap-xs">
     <span class="stat-value font-bold text-text-primary text-display-xs">{{ value() }}</span>
-    @if (badge()) {
-      <p-tag [value]="badge()!" [severity]="badgeSeverity()" />
+    @if (badge(); as b) {
+      <p-tag [value]="b.value" [severity]="b.severity" />
     }
   </div>
 </p-card>

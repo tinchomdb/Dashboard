@@ -10,10 +10,17 @@ import {
 import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 import { PopoverModule } from 'primeng/popover';
-import { DashboardWidget, ChartType } from '../../models/widget.model';
-import { KpiCard } from '../kpi-card/kpi-card';
-import { StatCard } from '../stat-card/stat-card';
-import { ChartCard } from '../chart-card/chart-card';
+import {
+  DashboardWidget,
+  ChartType,
+  KpiData,
+  StatData,
+  ChartData,
+  Badge,
+} from '../../models/widget.model';
+import { KpiCard } from './kpi-card/kpi-card';
+import { StatCard } from './stat-card/stat-card';
+import { ChartCard } from './chart-card/chart-card';
 
 const CHART_BASE_OPTIONS = {
   maintainAspectRatio: false,
@@ -53,8 +60,8 @@ const RADAR_OPTIONS = {
   selector: 'app-widget-host',
   imports: [SkeletonModule, ButtonModule, PopoverModule, KpiCard, StatCard, ChartCard],
   templateUrl: './widget-host.html',
-  styleUrl: './widget-host.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'block h-full' },
 })
 export class WidgetHost {
   widget = input.required<DashboardWidget>();
@@ -64,9 +71,16 @@ export class WidgetHost {
 
   private readonly chartCard = viewChild(ChartCard);
 
-  protected readonly isChartWidget = computed(() => {
-    const type = this.widget().type;
-    return type === 'bar-chart' || type === 'radar-chart' || type === 'horizontal-bar-chart';
+  protected readonly isChartWidget = computed(() => this.widget().type.endsWith('-chart'));
+
+  protected readonly displayValue = computed<string | number>(() => {
+    const data = this.widget().data as KpiData | StatData | null;
+    return data?.value ?? '--';
+  });
+
+  protected readonly statBadge = computed<Badge | undefined>(() => {
+    const data = this.widget().data as StatData | null;
+    return data?.badge;
   });
 
   protected readonly chartOptions = computed(() => {
@@ -81,6 +95,10 @@ export class WidgetHost {
     if (type === 'radar-chart') return 'radar';
     return 'bar';
   });
+
+  protected readonly chartData = computed<ChartData>(
+    () => (this.widget().data as ChartData) ?? { labels: [], datasets: [] },
+  );
 
   protected onRemove(): void {
     this.remove.emit(this.widget().id);
