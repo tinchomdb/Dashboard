@@ -99,21 +99,61 @@ describe('MockApiInterceptor', () => {
     httpClient.get('/api/user-layout').subscribe((data) => (result = data));
     vi.advanceTimersByTime(TICK_DELAY);
     expect(result).toBeTruthy();
-    const layout = result as { type: string; variantId: string; x: number; y: number }[];
-    expect(Array.isArray(layout)).toBe(true);
-    expect(layout.length).toBeGreaterThan(0);
-    expect(layout[0].type).toBe('kpi');
-    expect(layout[0].variantId).toBe('fellowship-count');
+    const layout = result as { columns: number; widgets: { type: string; variantId: string }[] };
+    expect(layout.columns).toBe(6);
+    expect(Array.isArray(layout.widgets)).toBe(true);
+    expect(layout.widgets.length).toBeGreaterThan(0);
+    expect(layout.widgets[0].type).toBe('kpi');
+    expect(layout.widgets[0].variantId).toBe('fellowship-count');
   });
 
   it('should accept PUT /api/user-layout and return 204', () => {
+    const payload = { columns: 4, widgets: [{ type: 'kpi', variantId: 'test', x: 0, y: 0 }] };
     let status: number | undefined;
     httpClient
-      .put('/api/user-layout', [{ type: 'kpi', variantId: 'test', x: 0, y: 0 }], {
-        observe: 'response',
-      })
+      .put('/api/user-layout', payload, { observe: 'response' })
       .subscribe((res) => (status = res.status));
     vi.advanceTimersByTime(TICK_DELAY);
     expect(status).toBe(204);
+  });
+
+  it('should fall back to default layout when localStorage has invalid data', () => {
+    localStorage.setItem('dashboard-user-layout', JSON.stringify({ bad: 'data' }));
+
+    let result: unknown;
+    httpClient.get('/api/user-layout').subscribe((data) => (result = data));
+    vi.advanceTimersByTime(TICK_DELAY);
+
+    const layout = result as { columns: number; widgets: { type: string; variantId: string }[] };
+    expect(layout.columns).toBe(6);
+    expect(layout.widgets.length).toBeGreaterThan(0);
+    expect(layout.widgets[0].type).toBe('kpi');
+  });
+
+  it('should fall back to default layout when localStorage has a plain array', () => {
+    localStorage.setItem(
+      'dashboard-user-layout',
+      JSON.stringify([{ type: 'kpi', variantId: 'test', x: 0, y: 0 }]),
+    );
+
+    let result: unknown;
+    httpClient.get('/api/user-layout').subscribe((data) => (result = data));
+    vi.advanceTimersByTime(TICK_DELAY);
+
+    const layout = result as { columns: number; widgets: { type: string }[] };
+    expect(layout.columns).toBe(6);
+    expect(layout.widgets.length).toBeGreaterThan(0);
+  });
+
+  it('should fall back to default layout when localStorage has corrupt JSON', () => {
+    localStorage.setItem('dashboard-user-layout', 'not-json');
+
+    let result: unknown;
+    httpClient.get('/api/user-layout').subscribe((data) => (result = data));
+    vi.advanceTimersByTime(TICK_DELAY);
+
+    const layout = result as { columns: number; widgets: unknown[] };
+    expect(layout.columns).toBe(6);
+    expect(layout.widgets.length).toBeGreaterThan(0);
   });
 });

@@ -57,6 +57,12 @@ export interface WidgetLayoutItem {
   y: number;
 }
 
+/** Full persisted dashboard state: grid settings + widget placements. */
+export interface UserDashboardLayout {
+  columns: number;
+  widgets: WidgetLayoutItem[];
+}
+
 export interface AddWidgetEvent {
   type: WidgetType;
   variantId: string;

@@ -1,13 +1,13 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { GridsterConfig, GridType, CompactType, DisplayGrid, GridsterApi } from 'angular-gridster2';
+import { GridsterConfig, GridType, CompactType, DisplayGrid } from 'angular-gridster2';
 import { DashboardRepository } from '../repositories/dashboard.repository';
 import {
   AddWidgetEvent,
   DashboardWidget,
+  UserDashboardLayout,
   WidgetCatalogGroup,
   WidgetData,
   WidgetDataResponse,
-  WidgetLayoutItem,
   WIDGET_TYPE_CONFIG,
   WIDGET_TYPES,
   WidgetType,
@@ -24,7 +24,6 @@ const ROW_HEIGHT_RATIO = 0.5;
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private readonly dashboardRepository = inject(DashboardRepository);
-  private readonly gridsterApi = signal<GridsterApi | null>(null);
 
   // ── State ──
 
@@ -64,8 +63,6 @@ export class DashboardService {
     draggable: { enabled: true, ignoreContent: true, dragHandleClass: 'widget-drag-handle' },
     resizable: { enabled: true },
     itemChangeCallback: () => this.persistLayout(),
-    itemResizeCallback: () => window.dispatchEvent(new Event('resize')),
-    initCallback: (_gridster, api) => this.gridsterApi.set(api),
   });
 
   constructor() {
@@ -77,7 +74,6 @@ export class DashboardService {
 
   addWidget({ type, variantId }: AddWidgetEvent): DashboardWidget {
     const widget = this.createWidget(type, variantId);
-    this.gridsterApi()?.getNextPossiblePosition?.(widget);
     this.widgets.update((list) => [...list, widget]);
     this.loadWidgetData(widget);
     this.persistLayout();
@@ -108,7 +104,6 @@ export class DashboardService {
       maxCols: columns,
       maxItemCols: columns,
     }));
-    this.gridsterApi()?.resize?.();
     this.persistLayout();
   }
 
@@ -136,9 +131,16 @@ export class DashboardService {
     });
   }
 
-  private applyLayout(layout: WidgetLayoutItem[]): void {
+  private applyLayout({ columns, widgets }: UserDashboardLayout): void {
+    this.columns.set(columns);
+    this.gridOptions.update((opts) => ({
+      ...opts,
+      minCols: columns,
+      maxCols: columns,
+      maxItemCols: columns,
+    }));
     this.widgets.set(
-      layout.map(({ type, variantId, x, y }) => this.createWidget(type, variantId, { x, y })),
+      widgets.map(({ type, variantId, x, y }) => this.createWidget(type, variantId, { x, y })),
     );
     this.widgets().forEach((w) => this.loadWidgetData(w));
   }
@@ -162,12 +164,15 @@ export class DashboardService {
   }
 
   private persistLayout(): void {
-    const layout: WidgetLayoutItem[] = this.widgets().map(({ type, variantId, x, y }) => ({
-      type,
-      variantId,
-      x,
-      y,
-    }));
+    const layout: UserDashboardLayout = {
+      columns: this.columns(),
+      widgets: this.widgets().map(({ type, variantId, x, y }) => ({
+        type,
+        variantId,
+        x,
+        y,
+      })),
+    };
     this.dashboardRepository.saveUserLayout(layout).subscribe({
       error: (err) => console.error('Failed to save layout', err),
     });

@@ -3,8 +3,8 @@ import { delay, of } from 'rxjs';
 import { MOCK_USER_PROFILE, WIDGET_MOCK_DATA } from '../data/mock-data';
 import { DEFAULT_LAYOUT } from '../data/default-layout';
 import {
+  UserDashboardLayout,
   WidgetCatalogGroup,
-  WidgetLayoutItem,
   WidgetType,
   WIDGET_TYPE_CONFIG,
   WIDGET_TYPES,
@@ -14,25 +14,15 @@ const DELAY_MIN = 1000;
 const DELAY_MAX = 2000;
 const LAYOUT_STORAGE_KEY = 'dashboard-user-layout';
 
-function randomDelay(): number {
-  return DELAY_MIN + Math.floor(Math.random() * (DELAY_MAX - DELAY_MIN));
-}
-
-function respond(body: unknown) {
-  return of(new HttpResponse({ status: 200, body })).pipe(delay(randomDelay()));
-}
-
 export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   // User profile
   if (req.url === '/api/user-profile') {
-    return respond(MOCK_USER_PROFILE);
+    return respond(MOCK_USER_PROFILE, 0);
   }
 
   // User layout: read from localStorage, fall back to default
   if (req.url === '/api/user-layout' && req.method === 'GET') {
-    const stored = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    const layout: WidgetLayoutItem[] = stored ? JSON.parse(stored) : DEFAULT_LAYOUT;
-    return respond(layout);
+    return respond(readStoredLayout(), 0);
   }
 
   // User layout save: persist to localStorage
@@ -74,3 +64,55 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req);
 };
+
+// ---------------------------------------------------------------------------
+// Helper functions
+// ---------------------------------------------------------------------------
+
+function randomDelay(): number {
+  return DELAY_MIN + Math.floor(Math.random() * (DELAY_MAX - DELAY_MIN));
+}
+
+function respond(body: unknown, delayMS = randomDelay()) {
+  return of(new HttpResponse({ status: 200, body })).pipe(delay(delayMS));
+}
+
+/**
+ * Reads persisted layout from localStorage and validates its shape.
+ * Returns DEFAULT_LAYOUT when nothing is stored or data is invalid.
+ */
+function readStoredLayout(): UserDashboardLayout {
+  const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
+  if (!raw) return DEFAULT_LAYOUT;
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return isValidLayout(parsed) ? parsed : DEFAULT_LAYOUT;
+  } catch {
+    return DEFAULT_LAYOUT;
+  }
+}
+
+function isValidLayout(value: unknown): value is UserDashboardLayout {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const { columns, widgets } = value as Record<string, unknown>;
+
+  if (typeof columns !== 'number' || columns < 1 || !Array.isArray(widgets)) {
+    return false;
+  }
+
+  return widgets.every((w) => {
+    if (typeof w !== 'object' || w === null) return false;
+    const { type, variantId, x, y } = w as Record<string, unknown>;
+    return (
+      typeof type === 'string' &&
+      (WIDGET_TYPES as readonly string[]).includes(type) &&
+      typeof variantId === 'string' &&
+      typeof x === 'number' &&
+      typeof y === 'number'
+    );
+  });
+}

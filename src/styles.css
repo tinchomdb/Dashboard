@@ -44,12 +44,18 @@
   --spacing-xl: 2rem;
 }
 
+/* ── Library Overrides ── */
+gridster.scrollVertical {
+  overflow-x: unset !important;
+  overflow-y: unset !important;
+}
+
 /* ── Global Resets ── */
 html,
 body {
   height: 100%;
-  margin: 0;
-  overflow: hidden;
+  max-width: 1200px;
+  margin: 0 auto;
   background-color: var(--color-surface-ground);
   color: var(--color-text-primary);
   font-family:

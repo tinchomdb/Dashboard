@@ -70,7 +70,10 @@ describe('DashboardRepository', () => {
   });
 
   it('should fetch user layout from /api/user-layout', () => {
-    const mockLayout = [{ type: 'kpi' as const, variantId: 'fellowship-count', x: 0, y: 0 }];
+    const mockLayout = {
+      columns: 6,
+      widgets: [{ type: 'kpi' as const, variantId: 'fellowship-count', x: 0, y: 0 }],
+    };
     let result: unknown;
 
     repository.fetchUserLayout().subscribe((data) => (result = data));
@@ -83,7 +86,10 @@ describe('DashboardRepository', () => {
   });
 
   it('should save user layout via PUT /api/user-layout', () => {
-    const layout = [{ type: 'kpi' as const, variantId: 'fellowship-count', x: 0, y: 0 }];
+    const layout = {
+      columns: 4,
+      widgets: [{ type: 'kpi' as const, variantId: 'fellowship-count', x: 0, y: 0 }],
+    };
 
     repository.saveUserLayout(layout).subscribe();
 

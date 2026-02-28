@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { WidgetCatalogGroup, WidgetLayoutItem, WidgetType } from '../models/widget.model';
+import { UserDashboardLayout, WidgetCatalogGroup, WidgetType } from '../models/widget.model';
 import { UserProfile } from '../models/user.model';
 
 const API_BASE = '/api';
@@ -22,11 +22,11 @@ export class DashboardRepository {
     return this.http.get<T>(`${API_BASE}/${type}/${variantId}`);
   }
 
-  fetchUserLayout(): Observable<WidgetLayoutItem[]> {
-    return this.http.get<WidgetLayoutItem[]>(`${API_BASE}/user-layout`);
+  fetchUserLayout(): Observable<UserDashboardLayout> {
+    return this.http.get<UserDashboardLayout>(`${API_BASE}/user-layout`);
   }
 
-  saveUserLayout(layout: WidgetLayoutItem[]): Observable<void> {
+  saveUserLayout(layout: UserDashboardLayout): Observable<void> {
     return this.http.put<void>(`${API_BASE}/user-layout`, layout);
   }
 }
